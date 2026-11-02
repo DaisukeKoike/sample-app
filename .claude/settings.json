@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "AWS_PROFILE": "sample-app-ai",
+    "AWS_REGION": "ap-northeast-1",
+    "AWS_SDK_LOAD_CONFIG": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(gh issue list:*)", "Bash(gh issue view:*)", "Bash(gh issue create:*)", "Bash(gh issue comment:*)", "Bash(gh issue edit:*)",
+      "Bash(gh pr view:*)", "Bash(gh pr list:*)", "Bash(gh pr create:*)", "Bash(gh pr checks:*)", "Bash(gh pr diff:*)",
+      "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git show:*)", "Bash(git switch:*)", "Bash(git pull:*)",
+      "Bash(git fetch:*)", "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push -u origin:*)", "Bash(git push origin:*)",
+      "Bash(git rev-parse:*)", "Bash(git branch:*)",
+      "Bash(docker build:*)", "Bash(docker push:*)", "Bash(docker login:*)",
+      "Bash(aws ecr get-login-password:*)", "Bash(aws ecr list-images:*)", "Bash(aws ecr describe-images:*)", "Bash(aws sts get-caller-identity:*)",
+      "Bash(terraform -chdir=infra/envs/issue:*)", "Bash(terraform fmt:*)", "Bash(terraform validate:*)",
+      "Bash(python -m pytest:*)", "Bash(pytest:*)", "Bash(ruff:*)",
+      "Bash(npx ng test:*)", "Bash(npx prettier:*)", "Bash(npx eslint:*)", "Bash(npx playwright test:*)"
+    ],
+    "ask": [
+      "Bash(aws ecr batch-delete-image:*)",
+      "Bash(git push origin --delete:*)",
+      "Bash(git branch -D:*)"
+    ],
+    "deny": [
+      "Bash(gh pr merge:*)",
+      "Bash(git push --force:*)", "Bash(git push -f:*)",
+      "Bash(terraform -chdir=infra/base:*)", "Bash(terraform -chdir=infra/bootstrap:*)",
+      "Read(./.env)", "Read(./.env.*)", "Read(./**/*.pem)", "Read(./**/*.key)", "Read(./secrets/**)", "Read(~/.aws/credentials)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.sh\"" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/format.sh\"" }] }
+    ]
+  }
+}

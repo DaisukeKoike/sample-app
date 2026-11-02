@@ -1,0 +1,18 @@
+name: 不具合
+description: 不具合の報告（AI の /issue-create でも同じ型で起票）
+labels: [bug]
+body:
+  - type: textarea
+    id: symptom
+    attributes: { label: 事象, description: 再現手順・期待結果・実際の結果 }
+    validations: { required: true }
+  - type: textarea
+    id: cause
+    attributes: { label: 原因（調査結果）, description: 箇所・コミット・関連課題。確定か仮説か }
+  - type: textarea
+    id: done
+    attributes: { label: 完了条件, description: テストで確かめられる書き方で }
+    validations: { required: true }
+  - type: textarea
+    id: related
+    attributes: { label: 関連課題, description: "#番号 と関係" }

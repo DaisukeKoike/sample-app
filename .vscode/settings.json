@@ -1,0 +1,7 @@
+{
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "files.eol": "\n",
+  "terminal.integrated.env.windows": { "PATH": "${env:USERPROFILE}\\.ai-harness\\bin;${env:PATH}" },
+  "terminal.integrated.env.osx": { "PATH": "${env:HOME}/.ai-harness/bin:${env:PATH}" },
+  "terminal.integrated.env.linux": { "PATH": "${env:HOME}/.ai-harness/bin:${env:PATH}" }
+}

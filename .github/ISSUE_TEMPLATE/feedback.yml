@@ -1,0 +1,18 @@
+name: ユーザーの声
+description: 利用者からの要望・問い合わせ
+labels: [feedback]
+body:
+  - type: textarea
+    id: voice
+    attributes: { label: 事象（ユーザーの声）, description: 原文の要約。個人情報は書かない }
+    validations: { required: true }
+  - type: textarea
+    id: cause
+    attributes: { label: 原因（調査結果） }
+  - type: textarea
+    id: done
+    attributes: { label: 完了条件 }
+    validations: { required: true }
+  - type: textarea
+    id: related
+    attributes: { label: 関連課題 }

@@ -1,0 +1,135 @@
+# 変更依頼ごとの自動チェック: 5種類を並列実行し、全成功後にレビューを依頼する
+# ※ 必須チェックに指定するジョブ名（lint/test/build/terraform/security）は他ワークフローと重複させない
+name: ci
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  API_DIR: "api"
+  WEB_DIR: ""
+  AWS_REGION: "ap-northeast-1"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: ruff
+        if: env.API_DIR != '' && hashFiles(format('{0}/**/*.py', env.API_DIR)) != ''
+        run: pip install ruff && ruff check "$API_DIR" && ruff format --check "$API_DIR"
+      - uses: actions/setup-node@v4
+        if: env.WEB_DIR != '' && hashFiles(format('{0}/package-lock.json', env.WEB_DIR)) != ''
+        with: { node-version: "22", cache: npm, cache-dependency-path: "${{ env.WEB_DIR }}/package-lock.json" }
+      - name: eslint / prettier
+        if: env.WEB_DIR != '' && hashFiles(format('{0}/package-lock.json', env.WEB_DIR)) != ''
+        working-directory: ${{ env.WEB_DIR }}
+        run: |
+          npm ci
+          npx eslint .
+          npx prettier --check "src/**/*.{ts,html,scss}"
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: pytest
+        if: env.API_DIR != '' && hashFiles(format('{0}/**/*.py', env.API_DIR)) != ''
+        working-directory: ${{ env.API_DIR }}
+        run: |
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; elif [ -f requirements.txt ]; then pip install -r requirements.txt pytest; else pip install pytest; fi
+          python -m pytest -q
+      - uses: actions/setup-node@v4
+        if: env.WEB_DIR != '' && hashFiles(format('{0}/package-lock.json', env.WEB_DIR)) != ''
+        with: { node-version: "22", cache: npm, cache-dependency-path: "${{ env.WEB_DIR }}/package-lock.json" }
+      - name: ng test
+        if: env.WEB_DIR != '' && hashFiles(format('{0}/package-lock.json', env.WEB_DIR)) != ''
+        working-directory: ${{ env.WEB_DIR }}
+        run: npm ci && npx ng test --watch=false --browsers=ChromeHeadless
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        if: hashFiles('Dockerfile') != ''
+        run: docker build -f "Dockerfile" -t ci-build:${{ github.sha }} .
+
+  terraform:
+    name: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "~1.11" }
+      - name: fmt
+        run: terraform fmt -check -recursive infra
+      - name: validate
+        run: |
+          for d in infra/base infra/envs/issue; do
+            terraform -chdir=$d init -backend=false -input=false
+            terraform -chdir=$d validate
+          done
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: vars.AWS_CI_ROLE_ARN != ''
+        with:
+          role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: plan (base)
+        if: vars.AWS_CI_ROLE_ARN != ''
+        run: |
+          terraform -chdir=infra/base init -input=false
+          terraform -chdir=infra/base plan -input=false -lock=false -no-color
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: dependency & secret scan (trivy) — blocking
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: IaC misconfig scan (trivy) — report only
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+
+  request-review:
+    name: request-review
+    needs: [lint, test, build, terraform, security]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: add reviewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEWERS: ""
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          [ -z "$REVIEWERS" ] && { echo "REVIEWERS 未設定"; exit 0; }
+          r=$(echo "$REVIEWERS" | tr ',' '\n' | grep -vx "$AUTHOR" | paste -sd, -)
+          [ -n "$r" ] && gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-reviewer "$r"

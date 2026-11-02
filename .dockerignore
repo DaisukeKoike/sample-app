@@ -1,0 +1,6 @@
+.git
+.claude
+.vscode
+infra
+.terraform
+**/__pycache__

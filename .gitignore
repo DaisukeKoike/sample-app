@@ -1,0 +1,11 @@
+.harness-backup/
+.terraform/
+*.tfplan
+tfplan
+destroy.tfplan
+.env
+.env.*
+pr-body.md
+issue-body.md
+.claude/settings.local.json
+infra/bootstrap/terraform.tfstate*
