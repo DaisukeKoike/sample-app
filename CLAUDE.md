@@ -50,3 +50,14 @@ terraform -chdir=infra/envs/issue fmt -check && terraform -chdir=infra/envs/issu
 - URL: `https://issue-<番号>.dev.example.com`
 - 作るのは ECS タスク定義・サービス・ターゲットグループ・リスナールール・Route53 レコードの5つだけ
 - 同時稼働は最大 20 環境（`tools/issue-env-audit.sh` で確認）
+
+## Project Lab ローカル演習
+- サンプルREADMEを先に読む。起動: `python api/app.py`。
+- `/issue-start N --local` ではAWS/Docker/Terraformを使わない。
+- `cd api && python -m pytest -q`。既知の5件はstrict xfail。修正対象だけ解除する。
+- 画面は標準HTML/JavaScript。Angularの手順はこのサンプルでは実行しない。
+- 正解集は利用者がヒント・答えを求めた場合のみ読む。
+- 本番データ、認証情報、社内情報を投入しない。公開環境にそのまま配置しない。
+
+## 設計図（UML）
+- Issue・作業計画・PRでは、状態遷移・複数層の処理・DB変更・複雑な分岐があるとき mermaid 図を付ける。基準は `.claude/uml-guide.md`

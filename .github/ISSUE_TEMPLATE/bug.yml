@@ -1,18 +1,79 @@
-name: 不具合
-description: 不具合の報告（AI の /issue-create でも同じ型で起票）
+name: bug
+description: 根拠と受入基準を備えた課題
 labels: [bug]
 body:
   - type: textarea
-    id: symptom
-    attributes: { label: 事象, description: 再現手順・期待結果・実際の結果 }
-    validations: { required: true }
+    id: summary
+    attributes:
+      label: 概要・背景
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
-    id: cause
-    attributes: { label: 原因（調査結果）, description: 箇所・コミット・関連課題。確定か仮説か }
+    id: repro
+    attributes:
+      label: 再現手順・現状
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
-    id: done
-    attributes: { label: 完了条件, description: テストで確かめられる書き方で }
-    validations: { required: true }
+    id: research
+    attributes:
+      label: 調査結果
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: スコープ・対象外
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: ac
+    attributes:
+      label: 受入基準
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: テスト計画
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: リスク・切戻し
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
     id: related
-    attributes: { label: 関連課題, description: "#番号 と関係" }
+    attributes:
+      label: 関連課題・依存
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: 完了の定義
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: uml
+    attributes:
+      label: 設計図
+      description: 必要なら mermaid 図（状態遷移・シーケンス・ER）。不要なら「図: 不要（理由）」。
