@@ -6,7 +6,7 @@ argument-hint: <issue番号>
 
 # 着手（ブランチと課題別環境の構築）
 
-引数 `$ARGUMENTS` を課題番号 `N` とする。数字でなければ中止する。
+引数 `$ARGUMENTS` の先頭を課題番号 `N`、残りをオプションとする。Nが数字でなければ中止する。
 コマンドは bash で実行する。`terraform` が見つからなければ先に `export PATH="$HOME/.ai-harness/bin:$PATH"`。
 
 ## 1. 課題の取得
@@ -17,6 +17,14 @@ gh issue view N --json number,title,body,labels,state
 - ラベルから種別: bug→`fix` / enhancement→`feat` / それ以外→`chore`
 - タイトルから英小文字・ハイフンの要約（3語以内）→ ブランチ名 `<種別>/N-<要約>`
 
+## 1a. 作業計画と実行モード
+- 未コミット変更があれば切替前に停止。勝手に stash/reset しない。
+- ACごとに変更候補、再現テスト、影響、依存、切戻しを整理し、Issueへ作業計画コメントを投稿する。既存の同じ計画は重複投稿しない。
+- 引数に `--local` があればローカルモード。ブランチ作成後、`python api/app.py` の起動手順を案内し、手順3以降のAWS/Docker/Terraformは実行しない。
+- `--local` は番号から除いて検証する。AWS未導入時はローカルモードを提案し、クラウド構築へ自動移行しない。
+- 作業計画に、Issueの設計図を基にした「変更後の図」を必要に応じて付ける（`.claude/uml-guide.md`）。Issueの図と実コードが食い違えば、実コードを正として計画コメントで指摘する。
+- 意図的バグの対象ACだけ回帰テストを追加する。他の演習バグをまとめて修正しない。
+
 ## 2. ブランチ作成（既にあれば切り替えのみ）
 ```bash
 git switch main && git pull --ff-only
@@ -25,6 +33,7 @@ git switch -c <ブランチ名>      # 既存なら: git switch <ブランチ名
 
 ## 3. イメージの作成と登録（docker が起動していなければ中止して人に伝える）
 ```bash
+# 未コミット差分があれば中止。タグと実際のコードを一致させる。
 SHA=$(git rev-parse --short HEAD)
 REG=000000000000.dkr.ecr.ap-northeast-1.amazonaws.com
 aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin $REG
@@ -40,6 +49,7 @@ terraform -chdir=infra/envs/issue plan -input=false -out=tfplan -var="issue_id=N
 terraform -chdir=infra/envs/issue apply -input=false tfplan
 rm -f infra/envs/issue/tfplan
 ```
+- このサンプルは認証なしの演習用。クラウド公開は既定で行わず、接続元制限と利用者の明示承認を必須とする。SQLiteはタスク再作成で消えるため永続性を保証しない。
 - plan に削除（destroy）が含まれる、または 5種類（タスク定義・サービス・ターゲットグループ・リスナールール・Route53レコード）以外を作る場合は **apply せず中止して人に報告**。
 - `tools/issue-env-audit.sh` が上限超過を返したら中止し、結果を示す。
 

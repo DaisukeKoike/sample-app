@@ -24,14 +24,8 @@ provider "aws" {
 locals {
   name               = "sample-app-dev"
   vpc_id             = "vpc-unset"
-  public_subnet_ids = [
-    "subnet-unset1",
-    "subnet-unset2",
-  ]
-  private_subnet_ids = [
-    "subnet-unset1",
-    "subnet-unset2",
-  ]
+  public_subnet_ids  = ["subnet-unset1","subnet-unset2"]
+  private_subnet_ids = ["subnet-unset1","subnet-unset2"]
   base_domain        = "dev.example.com"
 }
 

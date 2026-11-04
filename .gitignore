@@ -1,3 +1,7 @@
+api/data/
+__pycache__/
+.pytest_cache/
+.venv/
 .harness-backup/
 .terraform/
 *.tfplan

@@ -1,0 +1,3 @@
+interface:
+  display_name: "issue cleanup"
+  short_description: "根拠と受入基準を追跡する開発フロー"

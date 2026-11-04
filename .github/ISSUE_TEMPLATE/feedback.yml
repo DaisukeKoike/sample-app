@@ -1,18 +1,79 @@
-name: ユーザーの声
-description: 利用者からの要望・問い合わせ
+name: feedback
+description: 根拠と受入基準を備えた課題
 labels: [feedback]
 body:
   - type: textarea
-    id: voice
-    attributes: { label: 事象（ユーザーの声）, description: 原文の要約。個人情報は書かない }
-    validations: { required: true }
+    id: summary
+    attributes:
+      label: 概要・背景
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
-    id: cause
-    attributes: { label: 原因（調査結果） }
+    id: repro
+    attributes:
+      label: 再現手順・現状
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
-    id: done
-    attributes: { label: 完了条件 }
-    validations: { required: true }
+    id: research
+    attributes:
+      label: 調査結果
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: スコープ・対象外
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: ac
+    attributes:
+      label: 受入基準
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: テスト計画
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: リスク・切戻し
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
   - type: textarea
     id: related
-    attributes: { label: 関連課題 }
+    attributes:
+      label: 関連課題・依存
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: 完了の定義
+      description: 具体値と根拠を記載。未確認は未確認と明記。
+    validations:
+      required: true
+  - type: textarea
+    id: uml
+    attributes:
+      label: 設計図
+      description: 必要なら mermaid 図（状態遷移・シーケンス・ER）。不要なら「図: 不要（理由）」。
